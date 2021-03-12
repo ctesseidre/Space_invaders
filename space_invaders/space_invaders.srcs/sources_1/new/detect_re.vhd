@@ -35,8 +35,8 @@ entity detect_re is
     Port ( 
         rst_in  : in std_logic;
         clk_in  : in std_logic;
-        bp_in   : in std_logic_vector(3 downto 0);
-        detect_re   : out std_logic_vector(3 downto 0)
+        bp_in   : in std_logic_vector(2 downto 0);
+        detect_re   : out std_logic_vector(2 downto 0)
     );
 end detect_re;
 
