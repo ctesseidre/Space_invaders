@@ -47,8 +47,8 @@ architecture Behavioral of generate_base_screen is
     constant DISTANCE_BORD_V    : integer := 0;
     constant DISTANCE_ENTRE_ALIENS : integer := 13;
 
-    constant SIZE_ALIEN_H : integer := 11;
-    constant SIZE_ALIEN_V : integer := 8;
+    constant SIZE_MEM_H : integer := 11;
+    constant SIZE_MEM_V : integer := 8;
 
     constant SIZE_SCREEN_H : integer := 160;
     constant SIZE_SCREEN_V : integer := 100;
@@ -60,8 +60,11 @@ architecture Behavioral of generate_base_screen is
     signal ligne_actuelle   : integer;
     signal cpt_mem  : integer;
 
-    type alien_memory is array (0 to SIZE_ALIEN_H*SIZE_ALIEN_V-1) of std_logic_vector(2 downto 0);
-    signal alien : alien_memory := (
+    signal pos_ship : integer := 85;
+
+    type memory is array (0 to SIZE_MEM_H*SIZE_MEM_V-1) of std_logic_vector(2 downto 0);
+    
+    signal alien : memory := (
         "000", "000", "000", "111", "000", "000", "111", "000", "000", "000", "000", 
         "000", "000", "000", "111", "000", "000", "111", "000", "000", "000", "000", 
         "000", "000", "000", "111", "111", "111", "111", "111", "000", "000", "000", 
@@ -71,6 +74,19 @@ architecture Behavioral of generate_base_screen is
         "000", "000", "000", "111", "000", "000", "111", "000", "000", "000", "000", 
         "000", "000", "000", "111", "000", "000", "111", "000", "000", "000", "000"
     );
+
+    signal ship : memory := (
+        "000", "000", "000", "000", "000", "000", "000", "000", "000", "000", "000", 
+        "000", "000", "000", "000", "000", "000", "000", "000", "000", "000", "000", 
+        "000", "000", "000", "000", "000", "010", "000", "000", "000", "000", "000", 
+        "000", "000", "000", "000", "010", "010", "010", "000", "000", "000", "000", 
+        "000", "000", "000", "000", "010", "010", "010", "000", "000", "000", "000", 
+        "000", "010", "010", "010", "010", "010", "010", "010", "010", "010", "000", 
+        "000", "010", "010", "010", "010", "010", "010", "010", "010", "010", "000", 
+        "000", "010", "010", "010", "010", "010", "010", "010", "010", "010", "000"
+    );
+
+
 
 begin
 
@@ -86,13 +102,15 @@ begin
         end if;
     end process;    
     
-    -- Alien processing
     process(clk_in)
     variable cnt_mem_alien : integer := 0;
+    variable cnt_mem_ship  : integer := 0;
     begin
         if (clk_in'event and clk_in = '1') then
             if(en_gen_in = '1') then
-                if((ligne_actuelle >= DISTANCE_BORD_V) and (ligne_actuelle <= (DISTANCE_BORD_V + SIZE_ALIEN_V - 1))) then -- On se positionne verticalement
+
+                -- Alien processing
+                if((ligne_actuelle >= DISTANCE_BORD_V) and (ligne_actuelle <= (DISTANCE_BORD_V + SIZE_MEM_V - 1))) then -- On se positionne verticalement
                     if((to_integer(unsigned(addr_in))-((ligne_actuelle-1)*SIZE_SCREEN_H)) >= DISTANCE_BORD_H) then  -- Puis horizontalement
                         -- Positionnement à interval régulier --> Premier pixexl à 5, l'autre à 25, l'autre à 45 ...
                         if((to_integer(unsigned(addr_in))-((ligne_actuelle-1)*SIZE_SCREEN_H)) = DISTANCE_BORD_H) then   
@@ -103,28 +121,56 @@ begin
                             cnt_mem_alien := cnt_mem_alien + 1;
                         end if;
                         -- Remplissage de data_out avec la mémoire alien
-                        if(cnt_mem_alien < SIZE_ALIEN_H) then 
-                            data_out    <= alien(cnt_mem_alien + (SIZE_ALIEN_H*(ligne_actuelle-1)));
+                        if(cnt_mem_alien < SIZE_MEM_H) then 
+                            data_out    <= alien(cnt_mem_alien + (SIZE_MEM_H*(ligne_actuelle-1)));
                         else
                             data_out    <= BLACK;
                         end if;
                     else
                         data_out    <= BLACK;
                     end if;
+
+                -- Ship processing
+                elsif (ligne_actuelle >= SIZE_SCREEN_V - SIZE_MEM_V) then -- positionnement vertical
+                    if (((to_integer(unsigned(addr_in))-((ligne_actuelle-1)*SIZE_SCREEN_H)) >= pos_ship) and (to_integer(unsigned(addr_in))-((ligne_actuelle-1)*SIZE_SCREEN_H) <= pos_ship+SIZE_MEM_H))  then
+                        -- Positionnement du début du navire
+                        if ((to_integer(unsigned(addr_in))-((ligne_actuelle-1)*SIZE_SCREEN_H)) = pos_ship) then
+                            cnt_mem_ship := 0;
+                        else
+                            cnt_mem_ship := cnt_mem_ship + 1;
+                        end if;
+
+                        -- Remplissage de data_out avec la mémoire
+                        if(cnt_mem_ship < SIZE_MEM_H) then
+                            data_out    <= ship(cnt_mem_alien + (SIZE_MEM_H*(ligne_actuelle-1)));
+                        else
+                            data_out    <= BLACK;
+                        end if;
+                    else
+                        data_out    <= BLACK;
+                    end if;
+
                 else
                     data_out    <= BLACK;
                 end if;
             end if;
             cpt_mem <= cnt_mem_alien;
         end if;
-    end process;  
-
-    -- Ship processing
-    process
-    begin
-        
     end process;
 
+    -- Mouvement_Vaisseau : process(rst_in, clk_in)
+    -- begin
+    --     if (rst_in = '1') then
+    --         -- reset des positions
+    --         pos_ship <= SIZE_SCREEN_H*SIZE_SCREEN_V - 6*SIZE_SCREEN_H - 85;
+    --     elsif (clk_in'event and clk_in='1') then
+    --         if (dep_gauche = '1') then -- Gauche
+    --             pos_ship <= pos_ship - 5;
+    --         elsif (dep_droite = '1') then -- Droite
+    --             pos_ship <= pos_ship + 5;
+    --         end if;
+    --     end if;
+    -- end process;
     
 
 end Behavioral;
