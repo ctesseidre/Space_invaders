@@ -58,9 +58,10 @@ architecture Behavioral of generate_base_screen is
     constant GREEN : std_logic_vector := "010";
 
     signal ligne_actuelle   : integer;
-    signal cpt_mem  : integer;
+    signal cpt_mem_alien  : integer;
+    signal cpt_mem_ship  : integer;
 
-    signal pos_ship : integer := 85;
+    signal pos_ship : integer := 75;
 
     type memory is array (0 to SIZE_MEM_H*SIZE_MEM_V-1) of std_logic_vector(2 downto 0);
     
@@ -131,18 +132,18 @@ begin
                     end if;
 
                 -- Ship processing
-                elsif (ligne_actuelle >= SIZE_SCREEN_V - SIZE_MEM_V) then -- positionnement vertical
-                    if (((to_integer(unsigned(addr_in))-((ligne_actuelle-1)*SIZE_SCREEN_H)) >= pos_ship) and (to_integer(unsigned(addr_in))-((ligne_actuelle-1)*SIZE_SCREEN_H) <= pos_ship+SIZE_MEM_H))  then
+                elsif ((ligne_actuelle >= (SIZE_SCREEN_V - SIZE_MEM_V - DISTANCE_BORD_V)) and (ligne_actuelle < (SIZE_SCREEN_V - DISTANCE_BORD_V))) then -- positionnement vertical
+                    if (((to_integer(unsigned(addr_in))-((ligne_actuelle-1)*SIZE_SCREEN_H)) >= pos_ship) and (to_integer(unsigned(addr_in))-((ligne_actuelle-1)*SIZE_SCREEN_H) <= pos_ship+SIZE_MEM_H))  then -- Positionnement horizontal
                         -- Positionnement du début du navire
                         if ((to_integer(unsigned(addr_in))-((ligne_actuelle-1)*SIZE_SCREEN_H)) = pos_ship) then
                             cnt_mem_ship := 0;
-                        else
+                        elsif ( (to_integer(unsigned(addr_in))-((ligne_actuelle-1)*SIZE_SCREEN_H)) <= (pos_ship+SIZE_MEM_H) ) then 
                             cnt_mem_ship := cnt_mem_ship + 1;
                         end if;
 
                         -- Remplissage de data_out avec la mémoire
                         if(cnt_mem_ship < SIZE_MEM_H) then
-                            data_out    <= ship(cnt_mem_alien + (SIZE_MEM_H*(ligne_actuelle-1)));
+                            data_out    <= ship(cnt_mem_ship + (SIZE_MEM_H*(ligne_actuelle-(SIZE_SCREEN_V - SIZE_MEM_V))));
                         else
                             data_out    <= BLACK;
                         end if;
@@ -154,7 +155,8 @@ begin
                     data_out    <= BLACK;
                 end if;
             end if;
-            cpt_mem <= cnt_mem_alien;
+            cpt_mem_alien <= cnt_mem_alien;
+            cpt_mem_ship <= cnt_mem_ship;
         end if;
     end process;
 
