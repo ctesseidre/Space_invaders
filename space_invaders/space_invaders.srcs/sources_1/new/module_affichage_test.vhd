@@ -37,6 +37,8 @@ entity module_affichage_test is
         clk_in  : in std_logic;
         rst_in  : in std_logic;
         r_w_in  : in std_logic;
+        dep_gauche_in   : in std_logic;
+        dep_droite_in   : in std_logic;
         -- Outputs
         VGA_hs       : out std_logic;   -- horisontal vga syncr.
         VGA_vs       : out std_logic;   -- vertical vga syncr.
@@ -56,11 +58,13 @@ architecture Behavioral of module_affichage_test is
     signal addr_mem : std_logic_vector(NB_BITS_ADDR-1 downto 0);
     signal addr_vga : std_logic_vector(NB_BITS_ADDR-1 downto 0);
     -- R/W
-    signal r_w      : std_logic;
+    signal r_w  : std_logic;
     signal enable_write_memory  : std_logic;
     signal writing_in_memory    : std_logic;
     signal bp_in    : std_logic_vector(2 downto 0);
-    signal detect_re   : std_logic_vector(2 downto 0);
+    signal detect_re  : std_logic_vector(2 downto 0);
+    signal dep_droite : std_logic;
+    signal dep_gauche : std_logic;
     -- VGA
     signal color_gen    : std_logic_vector(2 downto 0);
     signal color_mem    : std_logic_vector(2 downto 0);
@@ -69,8 +73,9 @@ architecture Behavioral of module_affichage_test is
 
 begin
 
-    bp_in(1 downto 0)   <= "00";    -- Not used right now
-    bp_in(2)    <= r_w_in;
+    bp_in(2)    <= dep_gauche_in;
+    bp_in(1)    <= r_w_in;
+    bp_in(0)    <= dep_droite_in;
 
     inst_detect : entity work.detect_re
     port map (
@@ -175,7 +180,7 @@ begin
     port map (
         clk_in  => clk_in,
         rst_in  => rst_in,
-        r_w_in  => detect_re(2),
+        r_w_in  => detect_re(1),
         addr_in => addr_cnt,
         r_w_out => r_w
     );
@@ -191,7 +196,10 @@ begin
     inst_generate_base_screen : entity work.generate_base_screen
     port map (
         clk_in    => clk_in,
+        rst_in => rst_in,   
         en_gen_in => r_w,
+        dep_gauche_in => detect_re(2),
+        dep_droite_in => detect_re(0),
         addr_in   => addr_gen,
         data_out  => color_gen
     );

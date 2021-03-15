@@ -35,7 +35,10 @@ library work;
 entity generate_base_screen is
     Port ( 
         clk_in  : in std_logic;
+        rst_in  : in std_logic;
         en_gen_in : in std_logic;
+        dep_gauche_in   : in std_logic;
+        dep_droite_in   : in std_logic;
         addr_in   : in std_logic_vector(13 downto 0);
         data_out   : out std_logic_vector(2 downto 0)
     );
@@ -66,14 +69,14 @@ architecture Behavioral of generate_base_screen is
     type memory is array (0 to SIZE_MEM_H*SIZE_MEM_V-1) of std_logic_vector(2 downto 0);
     
     signal alien : memory := (
-        "000", "000", "000", "111", "000", "000", "111", "000", "000", "000", "000", 
-        "000", "000", "000", "111", "000", "000", "111", "000", "000", "000", "000", 
-        "000", "000", "000", "111", "111", "111", "111", "111", "000", "000", "000", 
-        "000", "000", "111", "000", "111", "111", "000", "111", "000", "000", "000", 
-        "000", "111", "111", "111", "111", "111", "111", "111", "111", "000", "000", 
-        "000", "111", "111", "111", "111", "111", "111", "111", "111", "000", "000", 
-        "000", "000", "000", "111", "000", "000", "111", "000", "000", "000", "000", 
-        "000", "000", "000", "111", "000", "000", "111", "000", "000", "000", "000"
+        "000", "000", "111", "000", "000", "000", "000", "000", "111", "000", "000", 
+        "000", "000", "000", "111", "000", "000", "000", "111", "000", "000", "000", 
+        "000", "000", "111", "111", "111", "111", "111", "111", "111", "000", "000", 
+        "000", "111", "111", "000", "111", "111", "111", "000", "111", "111", "000", 
+        "111", "111", "111", "111", "111", "111", "111", "111", "111", "111", "111", 
+        "111", "000", "111", "111", "111", "111", "111", "111", "111", "000", "111", 
+        "111", "000", "111", "000", "000", "000", "000", "000", "111", "000", "111", 
+        "000", "000", "000", "111", "111", "000", "111", "111", "000", "000", "000"
     );
 
     signal ship : memory := (
@@ -160,19 +163,23 @@ begin
         end if;
     end process;
 
-    -- Mouvement_Vaisseau : process(rst_in, clk_in)
-    -- begin
-    --     if (rst_in = '1') then
-    --         -- reset des positions
-    --         pos_ship <= SIZE_SCREEN_H*SIZE_SCREEN_V - 6*SIZE_SCREEN_H - 85;
-    --     elsif (clk_in'event and clk_in='1') then
-    --         if (dep_gauche = '1') then -- Gauche
-    --             pos_ship <= pos_ship - 5;
-    --         elsif (dep_droite = '1') then -- Droite
-    --             pos_ship <= pos_ship + 5;
-    --         end if;
-    --     end if;
-    -- end process;
+    mouvement_vaisseau : process(rst_in, clk_in)
+    begin
+        if (rst_in = '1') then
+            -- reset des positions
+            pos_ship <= 75;
+        elsif (clk_in'event and clk_in='1') then
+            if (dep_gauche_in = '1') then -- Gauche
+                if(pos_ship >= DISTANCE_BORD_H) then
+                    pos_ship <= pos_ship - 5;
+                end if;
+            elsif (dep_droite_in = '1') then -- Droite
+                if(pos_ship <= (SIZE_SCREEN_H - DISTANCE_BORD_H - 1))then
+                    pos_ship <= pos_ship + 5;
+                end if;
+            end if;
+        end if;
+    end process;
     
 
 end Behavioral;
