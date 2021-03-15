@@ -8,7 +8,7 @@ architecture tb of tb_use_vga is
 
     signal clk_in    : std_logic;
     signal rst_in    : std_logic;
-    signal r_w       : std_logic;
+    signal rst_out   : std_logic;
     signal VGA_hs    : std_logic;
     signal VGA_vs    : std_logic;
     signal VGA_red   : std_logic_vector (3 downto 0);
@@ -18,10 +18,10 @@ architecture tb of tb_use_vga is
 
 begin
 
-    dut : use_vga
+    dut : entity work.use_vga
     port map (clk_in    => clk_in,
               rst_in    => rst_in,
-              r_w       => r_w,
+              rst_out   => rst_out,
               VGA_hs    => VGA_hs,
               VGA_vs    => VGA_vs,
               VGA_red   => VGA_red,
@@ -36,6 +36,5 @@ begin
     end process;
 
     rst_in <= '1', '0' after 50 ns;
-    -- r_w <= ; ???? a toi de compléter  
 
 end tb;

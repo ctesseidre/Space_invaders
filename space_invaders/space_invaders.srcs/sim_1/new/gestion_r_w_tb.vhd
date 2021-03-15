@@ -47,7 +47,7 @@ architecture Behavioral of gestion_r_w_tb is
 
 begin
 
-    dut : entity work.gestion_r_w
+    dut : entity work.gestion_r_w2
     generic map(NB_BITS_ADDR => 14)
     port map (clk_in  => clk_in,
               rst_in  => rst_in,
@@ -77,15 +77,17 @@ begin
         -- Write ask --> flag write = '1'
         r_w_in  <= '1';         -- Just un RE
         wait for CLK_PERIOD;
+        addr_in <= std_logic_vector(to_unsigned(14, 14));
         r_w_in  <= '0';
-        -- Beginning of screen = '1' --> r_w_out = '1'
-        wait for CLK_PERIOD*5;
-        addr_in <= std_logic_vector(to_unsigned(0, 14));
         -- Beginning of screen = '0' --> r_w_out = '0'
         wait for CLK_PERIOD*5;
-        addr_in <= std_logic_vector(to_unsigned(16383, 14));
-        wait for CLK_PERIOD*5;
-        addr_in <= std_logic_vector(to_unsigned(3, 14));
+        addr_in <= std_logic_vector(to_unsigned(12, 14));
+        wait for CLK_PERIOD;
+        addr_in <= std_logic_vector(to_unsigned(13, 14));
+        wait for CLK_PERIOD;
+        addr_in <= std_logic_vector(to_unsigned(14, 14));
+        wait for CLK_PERIOD;
+        addr_in <= std_logic_vector(to_unsigned(15, 14));
         wait;
     end process;
 
