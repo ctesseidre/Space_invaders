@@ -39,14 +39,16 @@ entity generate_base_screen is
         en_gen_in : in std_logic;
         dep_gauche_in   : in std_logic;
         dep_droite_in   : in std_logic;
+        shoot_in        : in std_logic;
         addr_in   : in std_logic_vector(13 downto 0);
-        data_out   : out std_logic_vector(2 downto 0)
+        data_out   : out std_logic_vector(2 downto 0);
+        test_mort  : out std_logic_vector(10 downto 0)
     );
 end generate_base_screen;
 
 architecture Behavioral of generate_base_screen is
 
-    constant DISTANCE_BORD_H    : integer := 5;
+    constant DISTANCE_BORD_H    : integer := 6;
     constant DISTANCE_BORD_V    : integer := 0;
     constant DISTANCE_ENTRE_ALIENS : integer := 13;
 
@@ -65,6 +67,7 @@ architecture Behavioral of generate_base_screen is
     signal cpt_mem_ship  : integer;
 
     signal pos_ship : integer := 75;
+    signal pos_shoot, save_pos_shoot, pos_shoot_H : integer := 0;
 
     type memory is array (0 to SIZE_MEM_H*SIZE_MEM_V-1) of std_logic_vector(2 downto 0);
     
@@ -89,9 +92,11 @@ architecture Behavioral of generate_base_screen is
         "000", "010", "010", "010", "010", "010", "010", "010", "010", "010", "000", 
         "000", "010", "010", "010", "010", "010", "010", "010", "010", "010", "000"
     );
-
-
-
+  
+    signal init_cpt, en_cpt : std_logic;
+    signal cpt    : std_logic_vector(24 downto 0);
+    signal mort_alien : std_logic_vector(10 downto 0);
+    
 begin
 
     -- -- Traitement de la ligne
@@ -108,27 +113,46 @@ begin
     
     process(clk_in)
     variable cnt_mem_alien : integer := 0;
-    variable cnt_mem_ship  : integer := 0;
+    variable cnt_mem_ship  : integer := 0; 
+    variable cnt_alien     : integer := 0;
     begin
         if (clk_in'event and clk_in = '1') then
             if(en_gen_in = '1') then
 
                 -- Alien processing
-                if((ligne_actuelle >= DISTANCE_BORD_V) and (ligne_actuelle <= (DISTANCE_BORD_V + SIZE_MEM_V - 1))) then -- On se positionne verticalement
+                if((ligne_actuelle >= DISTANCE_BORD_V) and (ligne_actuelle <= (DISTANCE_BORD_V + SIZE_MEM_V))) then -- On se positionne verticalement
                     if((to_integer(unsigned(addr_in))-((ligne_actuelle-1)*SIZE_SCREEN_H)) >= DISTANCE_BORD_H) then  -- Puis horizontalement
-                        -- Positionnement Ã  interval rÃ©gulier --> Premier pixexl Ã  5, l'autre Ã  25, l'autre Ã  45 ...
+                        -- Positionnement à interval régulier --> Premier pixel à  5, l'autre à 25, l'autre à 45 ...
                         if((to_integer(unsigned(addr_in))-((ligne_actuelle-1)*SIZE_SCREEN_H)) = DISTANCE_BORD_H) then   
                             cnt_mem_alien := 0;
+                            cnt_alien := 0;
                         elsif (cnt_mem_alien = DISTANCE_ENTRE_ALIENS) then
                             cnt_mem_alien := 0;
+                            cnt_alien := cnt_alien + 1;
                         else
                             cnt_mem_alien := cnt_mem_alien + 1;
                         end if;
-                        -- Remplissage de data_out avec la mÃ©moire alien
+                        -- Remplissage de data_out avec la mémoire alien
                         if(cnt_mem_alien < SIZE_MEM_H) then 
-                            data_out    <= alien(cnt_mem_alien + (SIZE_MEM_H*(ligne_actuelle-1)));
+                            if(mort_alien(cnt_alien) = '0') then
+                                data_out    <= alien(cnt_mem_alien + (SIZE_MEM_H*(ligne_actuelle-1)));
+                            else
+                                data_out    <= BLACK;
+                            end if;
                         else
-                            data_out    <= BLACK;
+                        -- Shoot processing (sur la zone de génération des monstres)
+                            if ((ligne_actuelle >= (SIZE_SCREEN_V - DISTANCE_BORD_V - SIZE_MEM_V - pos_shoot - 2)) and (ligne_actuelle <= (SIZE_SCREEN_V - DISTANCE_BORD_V  - SIZE_MEM_V - pos_shoot))) then -- positionnement vertical
+                                if (((to_integer(unsigned(addr_in))-((ligne_actuelle-1)*SIZE_SCREEN_H)) = save_pos_shoot + 5)) then -- Positionnement horizontal
+                                    -- Positionnement du début du shoot
+                                    data_out    <= WHITE;
+                                 else
+                                    data_out    <= BLACK;
+                                 end if;
+                             else
+                                 data_out        <= BLACK;                
+                            end if;
+                            ------------
+                            --data_out    <= BLACK;
                         end if;
                     else
                         data_out    <= BLACK;
@@ -144,7 +168,7 @@ begin
                             cnt_mem_ship := cnt_mem_ship + 1;
                         end if;
 
-                        -- Remplissage de data_out avec la mÃ©moire
+                        -- Remplissage de data_out avec la mémoire
                         if(cnt_mem_ship < SIZE_MEM_H) then
                             data_out    <= ship(cnt_mem_ship + (SIZE_MEM_H*(ligne_actuelle-(SIZE_SCREEN_V - SIZE_MEM_V))));
                         else
@@ -153,11 +177,25 @@ begin
                     else
                         data_out    <= BLACK;
                     end if;
-
-                else
-                    data_out    <= BLACK;
-                end if;
+                    -- Shoot processing
+                    elsif ((ligne_actuelle >= (SIZE_SCREEN_V - DISTANCE_BORD_V - SIZE_MEM_V - pos_shoot - 2)) and (ligne_actuelle <= (SIZE_SCREEN_V - DISTANCE_BORD_V  - SIZE_MEM_V - pos_shoot))) then -- positionnement vertical
+                        if (((to_integer(unsigned(addr_in))-((ligne_actuelle-1)*SIZE_SCREEN_H)) = save_pos_shoot + 5)) then -- Positionnement horizontal
+                            -- Positionnement du début du shoot
+                            pos_shoot_H <= save_pos_shoot + 5;
+                            data_out    <= WHITE;
+                        else
+                            data_out    <= BLACK;
+                        end if;
+                    else
+                        data_out        <= BLACK;                
+                    end if;
+                ------------
+                                                  
+                
+            else
+                data_out    <= BLACK;
             end if;
+            
             cpt_mem_alien <= cnt_mem_alien;
             cpt_mem_ship <= cnt_mem_ship;
         end if;
@@ -171,15 +209,107 @@ begin
         elsif (clk_in'event and clk_in='1') then
             if (dep_gauche_in = '1') then -- Gauche
                 if(pos_ship >= DISTANCE_BORD_H) then
-                    pos_ship <= pos_ship - 5;
+                    pos_ship <= pos_ship - 1;
                 end if;
             elsif (dep_droite_in = '1') then -- Droite
                 if(pos_ship <= (SIZE_SCREEN_H - DISTANCE_BORD_H - 1))then
-                    pos_ship <= pos_ship + 5;
+                    pos_ship <= pos_ship + 1;
+                end if;
+            end if;
+        end if;
+    end process;
+
+    mouvement_shoot : process(rst_in, clk_in)
+    begin
+        if (rst_in = '1') then
+            -- reset des positions
+            pos_shoot <= -2;
+            en_cpt <= '0';
+        elsif (clk_in'event and clk_in='1') then
+            init_cpt <= '0';
+            if (shoot_in = '1' or en_cpt = '1') then -- Press shoot button
+                if(shoot_in = '1') then               
+                    save_pos_shoot <= pos_ship;
+                end if;
+                en_cpt <= '1';
+                if (to_integer(unsigned(cpt)) >= 20000000) then
+                    init_cpt <= '1';
+                    pos_shoot <= pos_shoot + 5;
+                elsif (pos_shoot > SIZE_SCREEN_V) then
+                    en_cpt <= '0';  
+                    pos_shoot <= -2;  
                 end if;
             end if;
         end if;
     end process;
     
-
+    inst_cpt_shoot : entity work.compteur_generique
+    generic map(NbBit => 25)
+    port map (
+        rst_in        => rst_in,
+        clk_in        => clk_in,
+        init_in       => init_cpt,
+        load_in       => '0',
+        enable_in     => en_cpt,
+        data_in       => (others => '0'),
+        data_out      => cpt
+    );
+    
+    gestion_mort : process(clk_in, rst_in)
+    begin
+        
+        if (rst_in = '1') then
+            mort_alien <= (others => '0');
+        elsif (clk_in'event and clk_in='1') then
+            -- Verification vertical du shoot
+            if (pos_shoot > 90) then 
+                -- Verification horizontal du shoot
+                                
+                if(pos_shoot_H >= 6 and pos_shoot_H <= 16 ) then
+                    mort_alien(0) <= '1'; 
+                end if;
+                
+                if(pos_shoot_H >= 20 and pos_shoot_H <= 30) then
+                    mort_alien(1) <= '1'; 
+                end if;
+                
+                if(pos_shoot_H >= 34 and pos_shoot_H <= 44) then
+                    mort_alien(2) <= '1'; 
+                end if;
+                
+                if(pos_shoot_H >= 48 and pos_shoot_H <= 58) then
+                    mort_alien(3) <= '1'; 
+                end if;
+                
+                if(pos_shoot_H >= 62 and pos_shoot_H <= 72) then
+                    mort_alien(4) <= '1'; 
+                end if;
+                
+                if(pos_shoot_H >= 76 and pos_shoot_H <= 86) then --- premier
+                    mort_alien(5) <= '1'; 
+                end if;
+                
+                if(pos_shoot_H >= 90 and pos_shoot_H <= 100) then
+                    mort_alien(6) <= '1'; 
+                end if;
+                
+                if(pos_shoot_H >= 104 and pos_shoot_H <= 114) then
+                    mort_alien(7) <= '1'; 
+                end if;
+                
+                if(pos_shoot_H >= 118 and pos_shoot_H <= 128) then
+                    mort_alien(8) <= '1'; 
+                end if;
+                
+                if(pos_shoot_H >= 132 and pos_shoot_H <= 142) then
+                    mort_alien(9) <= '1'; 
+                end if;
+                
+                if(pos_shoot_H >= 146 and pos_shoot_H <= 156) then
+                    mort_alien(10) <= '1'; 
+                end if;
+            end if;
+         end if;              
+    end process;
+    test_mort <= mort_alien;
 end Behavioral;

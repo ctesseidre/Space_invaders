@@ -39,12 +39,14 @@ entity module_affichage_test is
         r_w_in  : in std_logic;
         dep_gauche_in   : in std_logic;
         dep_droite_in   : in std_logic;
+        shoot_in        : in std_logic;
         -- Outputs
         VGA_hs       : out std_logic;   -- horisontal vga syncr.
         VGA_vs       : out std_logic;   -- vertical vga syncr.
         VGA_red      : out std_logic_vector(3 downto 0);   -- red output
         VGA_green    : out std_logic_vector(3 downto 0);   -- green output
-        VGA_blue     : out std_logic_vector(3 downto 0)   -- blue output
+        VGA_blue     : out std_logic_vector(3 downto 0);   -- blue output
+        test_mort    : out std_logic_vector(10 downto 0)
     );
 end module_affichage_test;
 
@@ -62,7 +64,9 @@ architecture Behavioral of module_affichage_test is
     signal enable_write_memory  : std_logic;
     signal writing_in_memory    : std_logic;
     signal bp_in    : std_logic_vector(2 downto 0);
+    signal bp_in2    : std_logic_vector(2 downto 0);
     signal detect_re  : std_logic_vector(2 downto 0);
+    signal detect_re2  : std_logic_vector(2 downto 0);
     signal dep_droite : std_logic;
     signal dep_gauche : std_logic;
     -- VGA
@@ -76,6 +80,10 @@ begin
     bp_in(2)    <= dep_gauche_in;
     bp_in(1)    <= r_w_in;
     bp_in(0)    <= dep_droite_in;
+    
+    bp_in2(0)    <= shoot_in;
+    bp_in2(1)    <= '0';
+    bp_in2(2)    <= '0';
 
     inst_detect : entity work.detect_re
     port map (
@@ -83,6 +91,14 @@ begin
         clk_in    => clk_in,
         bp_in     => bp_in,
         detect_re => detect_re
+    );
+    
+    inst_detect2 : entity work.detect_re
+    port map (
+        rst_in    => rst_in,
+        clk_in    => clk_in,
+        bp_in     => bp_in2,
+        detect_re => detect_re2
     );
 
     inst_cpt : entity work.compteur_modulo
@@ -160,7 +176,7 @@ begin
         VGA_blue   => VGA_blue,
         ADDR       => addr_vga,
         data_in    => color_mem,
-        data_write => data_write_vga,
+        data_write => '1',
         data_out   => data_vga
     );
 
@@ -200,8 +216,10 @@ begin
         en_gen_in => r_w,
         dep_gauche_in => detect_re(2),
         dep_droite_in => detect_re(0),
+        shoot_in      => detect_re2(0),
         addr_in   => addr_gen,
-        data_out  => color_gen
+        data_out  => color_gen,
+        test_mort => test_mort
     );
 
     data_write_vga  <= not(writing_in_memory);
