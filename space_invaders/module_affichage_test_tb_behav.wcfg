@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="module_affichage_test_tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="module_affichage_test_tb" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="145598200fs"></ZoomStartTime>
+      <ZoomEndTime time="145672401fs"></ZoomEndTime>
+      <Cursor1Time time="145627100fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="259"></NameColumnWidth>
+      <ValueColumnWidth column_width="118"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="23" />
+   <wvobject fp_name="/module_affichage_test_tb/clk_in" type="logic">
+      <obj_property name="ElementShortName">clk_in</obj_property>
+      <obj_property name="ObjectShortName">clk_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/rst_in" type="logic">
+      <obj_property name="ElementShortName">rst_in</obj_property>
+      <obj_property name="ObjectShortName">rst_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/r_w_in" type="logic">
+      <obj_property name="ElementShortName">r_w_in</obj_property>
+      <obj_property name="ObjectShortName">r_w_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/VGA_hs" type="logic">
+      <obj_property name="ElementShortName">VGA_hs</obj_property>
+      <obj_property name="ObjectShortName">VGA_hs</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/VGA_vs" type="logic">
+      <obj_property name="ElementShortName">VGA_vs</obj_property>
+      <obj_property name="ObjectShortName">VGA_vs</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/VGA_red" type="array">
+      <obj_property name="ElementShortName">VGA_red[3:0]</obj_property>
+      <obj_property name="ObjectShortName">VGA_red[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/VGA_green" type="array">
+      <obj_property name="ElementShortName">VGA_green[3:0]</obj_property>
+      <obj_property name="ObjectShortName">VGA_green[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/VGA_blue" type="array">
+      <obj_property name="ElementShortName">VGA_blue[3:0]</obj_property>
+      <obj_property name="ObjectShortName">VGA_blue[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/inst_module_affichage_test/addr_cnt" type="array">
+      <obj_property name="ElementShortName">addr_cnt[13:0]</obj_property>
+      <obj_property name="ObjectShortName">addr_cnt[13:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/inst_module_affichage_test/addr_gen" type="array">
+      <obj_property name="ElementShortName">addr_gen[13:0]</obj_property>
+      <obj_property name="ObjectShortName">addr_gen[13:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/inst_module_affichage_test/addr_mem" type="array">
+      <obj_property name="ElementShortName">addr_mem[13:0]</obj_property>
+      <obj_property name="ObjectShortName">addr_mem[13:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/inst_module_affichage_test/addr_vga" type="array">
+      <obj_property name="ElementShortName">addr_vga[13:0]</obj_property>
+      <obj_property name="ObjectShortName">addr_vga[13:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/inst_module_affichage_test/r_w" type="logic">
+      <obj_property name="ElementShortName">r_w</obj_property>
+      <obj_property name="ObjectShortName">r_w</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/inst_module_affichage_test/enable_write_memory" type="logic">
+      <obj_property name="ElementShortName">enable_write_memory</obj_property>
+      <obj_property name="ObjectShortName">enable_write_memory</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/inst_module_affichage_test/writing_in_memory" type="logic">
+      <obj_property name="ElementShortName">writing_in_memory</obj_property>
+      <obj_property name="ObjectShortName">writing_in_memory</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/inst_module_affichage_test/inst_mem/screen" type="array">
+      <obj_property name="ElementShortName">screen[0:15999][2:0]</obj_property>
+      <obj_property name="ObjectShortName">screen[0:15999][2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/inst_module_affichage_test/NB_BITS_ADDR" type="other">
+      <obj_property name="ElementShortName">NB_BITS_ADDR</obj_property>
+      <obj_property name="ObjectShortName">NB_BITS_ADDR</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/inst_module_affichage_test/inst_generate_base_screen/en_gen_in" type="logic">
+      <obj_property name="ElementShortName">en_gen_in</obj_property>
+      <obj_property name="ObjectShortName">en_gen_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/inst_module_affichage_test/inst_generate_base_screen/addr_in" type="array">
+      <obj_property name="ElementShortName">addr_in[13:0]</obj_property>
+      <obj_property name="ObjectShortName">addr_in[13:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/inst_module_affichage_test/inst_generate_base_screen/data_out" type="array">
+      <obj_property name="ElementShortName">data_out[2:0]</obj_property>
+      <obj_property name="ObjectShortName">data_out[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/inst_module_affichage_test/inst_generate_base_screen/ligne_actuelle" type="other">
+      <obj_property name="ElementShortName">ligne_actuelle</obj_property>
+      <obj_property name="ObjectShortName">ligne_actuelle</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/inst_module_affichage_test/inst_generate_base_screen/cpt_mem_alien" type="other">
+      <obj_property name="ElementShortName">cpt_mem_alien</obj_property>
+      <obj_property name="ObjectShortName">cpt_mem_alien</obj_property>
+   </wvobject>
+   <wvobject fp_name="/module_affichage_test_tb/inst_module_affichage_test/inst_generate_base_screen/cpt_mem_ship" type="other">
+      <obj_property name="ElementShortName">cpt_mem_ship</obj_property>
+      <obj_property name="ObjectShortName">cpt_mem_ship</obj_property>
+   </wvobject>
+</wave_config>
