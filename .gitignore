@@ -4,3 +4,5 @@ space_invaders/space_invaders.ip_user_files
 space_invaders/space_invaders.runs
 space_invaders/space_invaders.sim
 space_invaders/space_invaders.xpr
+*.jou
+*.log
