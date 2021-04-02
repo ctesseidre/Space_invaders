@@ -67,10 +67,11 @@ architecture Behavioral of generate_base_screen is
     signal cpt_mem_ship     : integer;
 
     signal pos_ship : integer := 75;
-    signal pos_shoot, save_pos_shoot, pos_shoot_H : integer := 0;
+    signal pos_shoot, save_pos_shoot, pos_shoot_H, pos_alien_V : integer := 0;
 
-    signal init_cpt, en_cpt : std_logic;
-    signal cpt    : std_logic_vector(24 downto 0);
+    signal init_cpt_shoot, en_cpt_shoot, init_cpt_alien, en_cpt_alien  : std_logic;
+    signal cpt_shoot   : std_logic_vector(24 downto 0);
+    signal cpt_alien  : std_logic_vector(26 downto 0);
     signal mort_alien : std_logic_vector(10 downto 0);
 
     type memory is array (0 to SIZE_MEM_H*SIZE_MEM_V-1) of std_logic_vector(2 downto 0);
@@ -138,9 +139,9 @@ begin
             if(en_gen_in = '1') then
 
                 -- Alien processing
-                if((ligne_actuelle >= DISTANCE_BORD_V) and (ligne_actuelle <= (DISTANCE_BORD_V + SIZE_MEM_V))) then -- On se positionne verticalement
-                    if((colonne_actuelle >= DISTANCE_BORD_H) and (colonne_actuelle <= (SIZE_SCREEN_H-DISTANCE_BORD_H))) then  -- Puis horizontalement
-                        -- Positionnement Ã  interval rÃ©gulier --> Premier pixexl Ã  5, l'autre Ã  25, l'autre Ã  45 ...
+                if((ligne_actuelle >= DISTANCE_BORD_V + pos_alien_V) and (ligne_actuelle <= (DISTANCE_BORD_V + SIZE_MEM_V + pos_alien_V))) then -- On se positionne verticalement
+                    if((colonne_actuelle >= DISTANCE_BORD_H ) and (colonne_actuelle < (SIZE_SCREEN_H - DISTANCE_BORD_H + 3))) then  -- Puis horizontalement
+                        -- Positionnement à interval régulier --> Premier pixel à 5, l'autre à 25, l'autre à 45 ...
                         if(colonne_actuelle = DISTANCE_BORD_H) then   
                             cnt_mem_alien := 0;
                             cnt_alien := 0;
@@ -153,18 +154,18 @@ begin
                             cnt_mem_alien := cnt_mem_alien + 1;
                         end if;
 
-                        -- Remplissage de data_out avec la mÃ©moire alien
+                        -- Remplissage de data_out avec la mémoire alien
                         if(cnt_mem_alien < SIZE_MEM_H) then 
                             if(mort_alien(cnt_alien) = '0') then
-                                data_out    <= alien(cnt_mem_alien + (SIZE_MEM_H*(ligne_actuelle-1)));
+                                data_out    <= alien(cnt_mem_alien + (SIZE_MEM_H*(ligne_actuelle-1-pos_alien_V)));
                             else
                                 data_out    <= BLACK;
                             end if;
                         else
-                            -- Shoot processing (sur la zone de gÃ©nÃ©ration des monstres)
+                            -- Shoot processing (sur la zone de génération des monstres)
                             if ((ligne_actuelle >= (SIZE_SCREEN_V - DISTANCE_BORD_V - SIZE_MEM_V - pos_shoot - 2)) and (ligne_actuelle <= (SIZE_SCREEN_V - DISTANCE_BORD_V  - SIZE_MEM_V - pos_shoot))) then -- positionnement vertical
                                 if (colonne_actuelle = (save_pos_shoot + 5)) then -- Positionnement horizontal
-                                    -- Positionnement du dÃ©but du shoot
+                                    -- Positionnement du début du shoot
                                     data_out    <= WHITE;
                                 else
                                     data_out    <= BLACK;
@@ -183,7 +184,7 @@ begin
                 elsif ((ligne_actuelle >= (SIZE_SCREEN_V - SIZE_MEM_V - DISTANCE_BORD_V)) and (ligne_actuelle < (SIZE_SCREEN_V - DISTANCE_BORD_V))) then -- positionnement vertical
                     
                     if ((colonne_actuelle >= pos_ship) and (colonne_actuelle <= pos_ship+SIZE_MEM_H))  then -- Positionnement horizontal
-                        -- Positionnement du dÃ©but du navire
+                        -- Positionnement du début du navire
                         if (colonne_actuelle = pos_ship) then
                             cnt_mem_ship := 0;
                         elsif (colonne_actuelle <= (pos_ship+SIZE_MEM_H) ) then 
@@ -246,21 +247,21 @@ begin
     begin
         if (rst_in = '1') then
             -- reset des positions
-            pos_shoot <= -2;
-            en_cpt <= '0';
+            pos_shoot <= -5;
+            en_cpt_shoot <= '0';
         elsif (clk_in'event and clk_in='1') then
-            init_cpt <= '0';
-            if (shoot_in = '1' or en_cpt = '1') then -- Press shoot button
+            init_cpt_shoot <= '0';
+            if (shoot_in = '1' or en_cpt_shoot = '1') then -- Press shoot button
                 if(shoot_in = '1') then               
                     save_pos_shoot <= pos_ship;
                 end if;
-                en_cpt <= '1';
-                if (to_integer(unsigned(cpt)) >= 20000000) then
-                    init_cpt <= '1';
+                en_cpt_shoot <= '1';
+                if (to_integer(unsigned(cpt_shoot)) >= 20000000) then
+                    init_cpt_shoot <= '1';
                     pos_shoot <= pos_shoot + 5;
                 elsif (pos_shoot > SIZE_SCREEN_V) then
-                    en_cpt <= '0';  
-                    pos_shoot <= -2;  
+                    en_cpt_shoot <= '0';  
+                    pos_shoot <= -5;  
                 end if;
             end if;
         end if;
@@ -271,11 +272,11 @@ begin
     port map (
         rst_in        => rst_in,
         clk_in        => clk_in,
-        init_in       => init_cpt,
+        init_in       => init_cpt_shoot,
         load_in       => '0',
-        enable_in     => en_cpt,
+        enable_in     => en_cpt_shoot,
         data_in       => (others => '0'),
-        data_out      => cpt
+        data_out      => cpt_shoot
     );
     
     gestion_mort : process(clk_in, rst_in)
@@ -285,7 +286,7 @@ begin
             mort_alien <= (others => '0');
         elsif (clk_in'event and clk_in='1') then
             -- Verification vertical du shoot
-            if (pos_shoot > 90) then 
+            if (pos_shoot > SIZE_SCREEN_V - DISTANCE_BORD_V - pos_alien_V + SIZE_MEM_V) then 
                 -- Verification horizontal du shoot
                                 
                 if(pos_shoot_H >= 6 and pos_shoot_H <= 16 ) then
@@ -308,7 +309,7 @@ begin
                     mort_alien(4) <= '1'; 
                 end if;
                 
-                if(pos_shoot_H >= 76 and pos_shoot_H <= 86) then --- premier
+                if(pos_shoot_H >= 76 and pos_shoot_H <= 86) then --- milieu
                     mort_alien(5) <= '1'; 
                 end if;
                 
@@ -334,5 +335,35 @@ begin
             end if;
          end if;              
     end process;
-
+    
+    inst_cpt_alien : entity work.compteur_generique
+    generic map(NbBit => 27)
+    port map (
+        rst_in        => rst_in,
+        clk_in        => clk_in,
+        init_in       => init_cpt_alien,
+        load_in       => '0',
+        enable_in     => en_cpt_alien,
+        data_in       => (others => '0'),
+        data_out      => cpt_alien
+    );
+    
+    gestion_pos_alien : process(clk_in, rst_in)
+    begin
+        if (rst_in = '1') then
+            pos_alien_V <= 0;
+            en_cpt_alien <= '1';
+        elsif (clk_in'event and clk_in='1') then
+            init_cpt_alien <= '0';
+            if (en_cpt_alien = '1') then 
+                if (to_integer(unsigned(cpt_alien)) >= 80000000) then
+                    init_cpt_alien <= '1';
+                    pos_alien_V <= pos_alien_V + 1;
+                elsif (pos_alien_V > SIZE_SCREEN_V - SIZE_MEM_V - DISTANCE_BORD_V - 2) then
+                    en_cpt_alien <= '0';  
+                end if;
+            end if;
+        end if;
+    end process;
+    
 end Behavioral;
